@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.Entity.Product;
+import com.example.demo.Exception.ResourceNotFoundException;
 import com.example.demo.Repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,34 +29,26 @@ public class ProductService {
 
 
     public Product getProductById(Long productId){
-        return repo.findById(productId).orElse(null);
+        return repo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
     }
 
 
     public Product updateProduct(Long id,Product p){
-        Product product=repo.findById(id).orElse(null);
+        Product product = getProductById(id);
 
-        if(product!=null){
-            product.setProductName(p.getProductName());
-            product.setProductId(p.getProductId());
-            product.setPrice(p.getPrice());
-            product.setCategory(p.getCategory());
-            product.setQuantity(p.getQuantity());
+        product.setProductName(p.getProductName());
+        product.setPrice(p.getPrice());
+        product.setCategory(p.getCategory());
+        product.setQuantity(p.getQuantity());
 
-            return repo.save(product);
-        }
-
-        return null;
+        return repo.save(product);
     }
 
     public String deleteProductById(Long Id){
-        repo.deleteById(Id);
-        if(getProductById(Id) == null){
-            return "Product deleted Successfully";
-        }
-
-        return null;
-
+        Product product = getProductById(Id);
+        repo.delete(product);
+        return "Product deleted Successfully";
     }
 
 

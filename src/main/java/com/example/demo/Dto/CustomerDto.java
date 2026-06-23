@@ -4,10 +4,8 @@ import lombok.*;
 
 @Data
 public class CustomerDto {
-
-    String fullname;
-
-    String city;
-
-    int age;
+    private Long customerId;
+    private String name;
+    private String email;
+    private String city;
 }

@@ -4,6 +4,7 @@ import com.example.demo.Entity.Product;
 import com.example.demo.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -15,12 +16,12 @@ public class ProductController {
     ProductService service;
 
     @PostMapping
-    public Product addProuct(Product p){
+    public Product addProuct(@RequestBody @Valid Product p){
         return service.addProduct(p);
     }
 
     @PostMapping("/list")
-    public List<Product> saveProductsByList(@RequestBody List<Product> products){
+    public List<Product> saveProductsByList(@RequestBody @Valid List<Product> products){
         return service.saveProductList(products);
     }
 
@@ -35,7 +36,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public Product UpdateProduct(@PathVariable Long id , @RequestBody Product product){
+    public Product UpdateProduct(@PathVariable Long id , @RequestBody @Valid Product product){
         return service.updateProduct(id,product);
     }
 
@@ -45,8 +46,8 @@ public class ProductController {
     }
 
     @GetMapping("/category/{category}")
-    public List<Product> getProductsByCategory(String Category){
-        return service.getProductByCategory(Category);
+    public List<Product> getProductsByCategory(@PathVariable("category") String category){
+        return service.getProductByCategory(category);
     }
 
 }

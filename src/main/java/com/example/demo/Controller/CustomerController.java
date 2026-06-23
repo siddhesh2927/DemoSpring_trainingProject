@@ -1,13 +1,16 @@
 package com.example.demo.Controller;
 
 
+import com.example.demo.Dto.CustomerDto;
 import com.example.demo.Entity.Customer;
 import com.example.demo.Service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/customers")
@@ -16,51 +19,67 @@ public class CustomerController {
     @Autowired
     CustomerService service;
 
+    private CustomerDto convertToDto(Customer customer) {
+        if (customer == null) return null;
+        CustomerDto dto = new CustomerDto();
+        dto.setCustomerId(customer.getCustomerId());
+        dto.setName(customer.getName());
+        dto.setEmail(customer.getEmail());
+        dto.setCity(customer.getCity());
+        return dto;
+    }
 
     @GetMapping
-    List<Customer> getAllCustomer(){
-        return service.getAllCustomers();
-    };
+    public List<CustomerDto> getAllCustomer(){
+        return service.getAllCustomers().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
     @PostMapping
-    Customer saveCustomer(@RequestBody Customer cust){
-        return  service.SaveCustomer(cust);
+    public CustomerDto saveCustomer(@RequestBody @Valid Customer cust){
+        return convertToDto(service.SaveCustomer(cust));
     }
 
     @GetMapping("/{id}")
-    Optional<Customer> getCustomerbyId(@PathVariable Long id){
-        return  service.getCustomerById(id);
+    public CustomerDto getCustomerbyId(@PathVariable Long id){
+        return convertToDto(service.getCustomerById(id));
     }
 
     @GetMapping("/email/{email}")
-    Customer getCustomerByEmail(@PathVariable String email){
-        return service.getCustomerByEmail(email);
+    public CustomerDto getCustomerByEmail(@PathVariable String email){
+        return convertToDto(service.getCustomerByEmail(email));
     }
 
     @GetMapping("/city/{city}")
-    List<Customer> getCustomerByCity(@PathVariable String city){
-        return service.getCustomerByCity(city);
+    public List<CustomerDto> getCustomerByCity(@PathVariable String city){
+        return service.getCustomerByCity(city).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/age/{age}")
-    List<Customer> getCustomerByAge(@PathVariable int age){
-        return service.getCustomerByAge(age);
+    public List<CustomerDto> getCustomerByAge(@PathVariable int age){
+        return service.getCustomerByAge(age).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/list")
-    List<Customer> SaveCustomerByAList(@RequestBody List<Customer> cust){
-        return service.saveCustomerList(cust);
+    public List<CustomerDto> SaveCustomerByAList(@RequestBody @Valid List<Customer> cust){
+        return service.saveCustomerList(cust).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @PutMapping("/{Id}")
-    Customer UpdateCustomerById(@PathVariable Long Id , @RequestBody Customer cust){
-        return service.UpdateCustomer(Id,cust);
+    public CustomerDto UpdateCustomerById(@PathVariable Long Id , @RequestBody @Valid Customer cust){
+        return convertToDto(service.UpdateCustomer(Id,cust));
     }
 
     @DeleteMapping("/{Id}")
-    void DeleteCustomerById(@PathVariable  Long Id){
+    public void DeleteCustomerById(@PathVariable Long Id){
         service.deleteCustomer(Id);
     }
-
 
 }

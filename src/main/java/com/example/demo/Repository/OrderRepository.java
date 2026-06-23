@@ -4,6 +4,7 @@ import com.example.demo.Entity.Orders;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Orders,Long> {
@@ -12,18 +13,17 @@ public interface OrderRepository extends JpaRepository<Orders,Long> {
                  select count(o)
                  from Orders o
                  Where o.customer.customerId=:customerId""")
-    Long countOrder();
+    Long countOrder(@Param("customerId") Long customerId);
 
     @Query("""
                 select sum(o.totalPrice)
                 from Orders o
                 Where o.customer.customerId=:customerId""")
-    double totalAmount(Long customerId);
-
+    Double totalAmount(@Param("customerId") Long customerId);
 
     @Query("""
                 select sum(o.totalPrice)
                 from Orders o""")
-    double totalRevenue();
+    Double totalRevenue();
 
 }

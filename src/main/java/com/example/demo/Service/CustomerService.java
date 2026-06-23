@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import com.example.demo.Exception.ResourceNotFoundException;
 
 
 @Service
@@ -24,13 +25,14 @@ public class CustomerService {
         return repository.save(customer);
     }
 
-    public Optional<Customer> getCustomerById(Long id){
-
-        return repository.findById(id);
+    public Customer getCustomerById(Long id){
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
     }
 
     public Customer getCustomerByEmail(String email){
-        return repository.findByEmail(email).orElse(null);
+        return repository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with email: " + email));
     }
 
     public List<Customer> getCustomerByCity(String City){
@@ -45,22 +47,17 @@ public class CustomerService {
         return repository.saveAll(cust);
     }
 
-    public  Customer UpdateCustomer(Long id , Customer cust){
-        Customer ExistingCust=repository.findById(id).orElse(null);
+    public Customer UpdateCustomer(Long id , Customer cust){
+        Customer ExistingCust = getCustomerById(id);
 
-        if(ExistingCust !=null){
-            ExistingCust.setCustomerId(cust.getCustomerId());
-            ExistingCust.setName(cust.getName());
-            ExistingCust.setAge(cust.getAge());
-            ExistingCust.setEmail(cust.getEmail());
-            ExistingCust.setPassword(cust.getPassword());
-            ExistingCust.setBankUserName(cust.getBankUserName());
-            ExistingCust.setCity(cust.getCity());
+        ExistingCust.setName(cust.getName());
+        ExistingCust.setAge(cust.getAge());
+        ExistingCust.setEmail(cust.getEmail());
+        if(cust.getPassword() != null) ExistingCust.setPassword(cust.getPassword());
+        ExistingCust.setBankUserName(cust.getBankUserName());
+        ExistingCust.setCity(cust.getCity());
 
-            return repository.save(ExistingCust);
-
-        }
-        return null;
+        return repository.save(ExistingCust);
     }
 
     public void deleteCustomer(Long Id){

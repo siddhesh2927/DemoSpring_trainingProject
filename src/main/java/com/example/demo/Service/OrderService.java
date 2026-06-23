@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import com.example.demo.Exception.ResourceNotFoundException;
 
 @Service
 public class OrderService {
@@ -24,23 +25,27 @@ public class OrderService {
 
 
     public Orders placeOrder(Long custId , Long ProdId , int qty){
-        Customer customer=custRepo.findById(custId).orElse(null);
+        Customer customer = custRepo.findById(custId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + custId));
 
-        if(customer!=null){
-            Product product=productRepo.findById(ProdId).orElse(null);
+        Product product = productRepo.findById(ProdId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + ProdId));
 
-            if(product!=null){
-                Orders order = new Orders();
-                order.setCustomer(customer);
-                order.setProduct(product);
-                order.setQuantityOrdered(qty);
-
-                order.setTotalPrice(product.getPrice()*qty);
-
-                return orderRepo.save(order);
-            }
+        if (product.getQuantity() < qty) {
+            throw new IllegalArgumentException("Insufficient stock for product: " + product.getProductName());
         }
-        return null;
+
+        // Deduct inventory
+        product.setQuantity(product.getQuantity() - qty);
+        productRepo.save(product);
+
+        Orders order = new Orders();
+        order.setCustomer(customer);
+        order.setProduct(product);
+        order.setQuantityOrdered(qty);
+        order.setTotalPrice(product.getPrice() * qty);
+
+        return orderRepo.save(order);
     }
 
 
